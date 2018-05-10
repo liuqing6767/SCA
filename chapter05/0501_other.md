@@ -48,5 +48,80 @@ GetStringMapString(key string) map[string]string
 GetStringMapStringSlice(key string) map[string][]string
 ```
 
+### 路由组
+```
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	r := gin.New()
+
+    // 使用日志插件
+	r.Use(gin.Logger())
+
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello world")
+	})
+
+
+    // 使用路由组
+	authGroup := r.Group("/auth", func(c *gin.Context) {
+		token := c.Query("token")
+		if token != "123456" {
+			c.AbortWithStatusJSON(200, map[string]string{
+				"code": "401",
+				"msg":  "auth fail",
+			})
+		}
+
+		c.Next()
+	})
+
+    // 注册 /auth/info 处理者
+	authGroup.GET("/info", func(c *gin.Context) {
+		c.JSON(200, map[string]string{
+			"id":   "1234",
+			"name": "name",
+		})
+	})
+
+	r.Run("0.0.0:8910")
+}
+```
+
+路由组可以将路由分组管理
+```
+// routergroup.go:15
+type IRouter interface {
+	IRoutes
+	Group(string, ...HandlerFunc) *RouterGroup
+}
+
+// routergroup.go:40
+type RouterGroup struct {
+	Handlers HandlersChain
+	basePath string
+	engine   *Engine
+	root     bool
+}
+
+var _ IRouter = &RouterGroup{}
+
+// routergroup.go:55
+func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *RouterGroup {
+	return &RouterGroup{
+		Handlers: group.combineHandlers(handlers),
+		basePath: group.calculateAbsolutePath(relativePath),
+		engine:   group.engine,
+	}
+}
+```
+
+其实 `Engine` 就实现了 `IRouter` 接口 就是个 路由组；而路由组是基于路由组产生的。
+
 ### 其他
 我一直没有搞明白 `content negotiation` (context.go:750)是干嘛用的。
+
