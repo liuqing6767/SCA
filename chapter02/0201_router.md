@@ -53,13 +53,13 @@ type IRouter interface {
 gin.go:50
 
 type Engine struct {
-	RouterGroup
+    RouterGroup
 
     // 如果true，当前路由匹配失败但将路径最后的 / 去掉时匹配成功时自动匹配后者
     // 比如：请求是 /foo/ 但没有命中，而存在 /foo，
     // 对get method请求，客户端会被301重定向到 /foo
     // 对于其他method请求，客户端会被307重定向到 /foo
-	RedirectTrailingSlash bool
+    RedirectTrailingSlash bool
 
     // 如果true，在没有处理者被注册来处理当前请求时router将尝试修复当前请求路径
     // 逻辑为：
@@ -68,25 +68,25 @@ type Engine struct {
     // 如果找到了处理者，请求会被301或307重定向
     // 比如： /FOO 和 /..//FOO 会被重定向到 /foo
     // RedirectTrailingSlash 参数和这个参数独立
-	RedirectFixedPath bool
+    RedirectFixedPath bool
 
     // 如果true，当路由没有被命中时，去检查是否有其他method命中
     //  如果命中，响应405 （Method Not Allowed）
     //  如果没有命中，请求将由 NotFound handler 来处理
-	HandleMethodNotAllowed bool
+    HandleMethodNotAllowed bool
 
     // 如果true， url.RawPath 会被用来查找参数
-	UseRawPath bool
+    UseRawPath bool
 
     // 如果true， path value 会被保留
     // 如果 UseRawPath是false(默认)，UnescapePathValues为true
     // url.Path会被保留并使用
     UnescapePathValues bool
 
-	allNoRoute       HandlersChain
-	allNoMethod      HandlersChain
-	noRoute          HandlersChain
-	noMethod         HandlersChain
+    allNoRoute       HandlersChain
+    allNoMethod      HandlersChain
+    noRoute          HandlersChain
+    noMethod         HandlersChain
 
     //每个http method对应一棵树
     trees            methodTrees
