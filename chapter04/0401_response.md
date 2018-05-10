@@ -15,25 +15,25 @@ type Context struct {
 
 // response_writer.go:20
 type ResponseWriter interface {
-	http.ResponseWriter //嵌入接口
-	http.Hijacker       //嵌入接口
-	http.Flusher        //嵌入接口
-	http.CloseNotifier  //嵌入接口
-
+    http.ResponseWriter //嵌入接口
+    http.Hijacker       //嵌入接口
+    http.Flusher        //嵌入接口
+    http.CloseNotifier  //嵌入接口
+    
     // 返回当前请求的 response status code
-	Status() int
-
+    Status() int
+    
     // 返回写入 http body的字节数
-	Size() int
-
+    Size() int
+    
     // 写string
-	WriteString(string) (int, error)
-
+    WriteString(string) (int, error)
+    
     //是否写出
-	Written() bool
-
+    Written() bool
+    
     // 强制写htp header (状态码 + headers)
-	WriteHeaderNow()
+    WriteHeaderNow()
 }
 
 // response_writer.go:40
