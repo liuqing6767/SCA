@@ -16,8 +16,8 @@
 ```
 // context.go:40
 type Context struct {
-	// 一系列的错误
-	Errors errorMsgs
+    // 一系列的错误
+    Errors errorMsgs
 }
 
 Error(err error) *Error // 给本次请求添加个错误。将错误收集然后用中间件统一处理（打日志|入库）是一个比较好的方案
@@ -28,8 +28,8 @@ Error(err error) *Error // 给本次请求添加个错误。将错误收集然�
 ```
 // context.go:40
 type Context struct {
-	// 在context可以设置的值
-	Keys map[string]interface{}
+    // 在context可以设置的值
+    Keys map[string]interface{}
 }
 
 Set(key string, value interface{})  //本次请求用户设置各种数据 (Keys 字段)
@@ -51,44 +51,44 @@ GetStringMapStringSlice(key string) map[string][]string
 ### 路由组
 ```
 import (
-	"net/http"
+    "net/http"
 
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.New()
+    r := gin.New()
 
-	// 使用日志插件
-	r.Use(gin.Logger())
+    // 使用日志插件
+    r.Use(gin.Logger())
 
-	r.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Hello world")
-	})
+    r.GET("/", func(c *gin.Context) {
+        c.String(http.StatusOK, "Hello world")
+    })
 
 
-	// 使用路由组
-	authGroup := r.Group("/auth", func(c *gin.Context) {
-		token := c.Query("token")
-		if token != "123456" {
-			c.AbortWithStatusJSON(200, map[string]string{
-				"code": "401",
-				"msg":  "auth fail",
-			})
-		}
+    // 使用路由组
+    authGroup := r.Group("/auth", func(c *gin.Context) {
+        token := c.Query("token")
+        if token != "123456" {
+            c.AbortWithStatusJSON(200, map[string]string{
+                "code": "401",
+                "msg":  "auth fail",
+            })
+        }
 
-		c.Next()
-	})
+        c.Next()
+    })
 
-	// 注册 /auth/info 处理者
-	authGroup.GET("/info", func(c *gin.Context) {
-		c.JSON(200, map[string]string{
-			"id":   "1234",
-			"name": "name",
-		})
-	})
+    // 注册 /auth/info 处理者
+    authGroup.GET("/info", func(c *gin.Context) {
+        c.JSON(200, map[string]string{
+            "id":   "1234",
+            "name": "name",
+        })
+    })
 
-	r.Run("0.0.0:8910")
+    r.Run("0.0.0:8910")
 }
 ```
 
@@ -96,27 +96,27 @@ func main() {
 ```
 // routergroup.go:15
 type IRouter interface {
-	IRoutes
-	Group(string, ...HandlerFunc) *RouterGroup
+    IRoutes
+    Group(string, ...HandlerFunc) *RouterGroup
 }
 
 // routergroup.go:40
 type RouterGroup struct {
-	Handlers HandlersChain
-	basePath string
-	engine   *Engine
-	root	 bool
+    Handlers HandlersChain
+    basePath string
+    engine   *Engine
+    root     bool
 }
 
 var _ IRouter = &RouterGroup{}
 
 // routergroup.go:55
 func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *RouterGroup {
-	return &RouterGroup{
-		Handlers: group.combineHandlers(handlers),
-		basePath: group.calculateAbsolutePath(relativePath),
-		engine:   group.engine,
-	}
+    return &RouterGroup{
+        Handlers: group.combineHandlers(handlers),
+        basePath: group.calculateAbsolutePath(relativePath),
+        engine:   group.engine,
+    }
 }
 ```
 
