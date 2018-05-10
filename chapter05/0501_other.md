@@ -124,4 +124,3 @@ func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *R
 
 ### 其他
 我一直没有搞明白 `content negotiation` (context.go:750)是干嘛用的。
-
