@@ -8,10 +8,10 @@
 ```
 // context.go:40
 type Context struct {
-    // ServeHTTP的第二个参数: request
+	// ServeHTTP的第二个参数: request
 	Request   *http.Request
 
-    // URL里面的参数，比如：/xx/:id  
+	// URL里面的参数，比如：/xx/:id  
 	Params   Params
 }
 ```
@@ -20,7 +20,7 @@ type Context struct {
 在路由解析时会初始化 `Params`
 提供Get函数：
 ```
-Param(key string) string    
+Param(key string) string	
 ```
 
 ### 获取请求数据：
@@ -79,24 +79,24 @@ MustBindJSON(obj interface{}) error
 // 首先有一个Binding接口，
 //binding/binding.go:27
 type Binding interface {
-    // 绑定器的名称
+	// 绑定器的名称
 	Name() string
-    // 进行数据绑定
+	// 进行数据绑定
 	Bind(*http.Request, interface{}) error
 }
 
 // 然后有一个矩阵得到binding对象
 //binding/binding.go:70
-method      content-type                binding
+method	  content-type				binding
 -----------------------------------------------
-GET         *                           Form
-*           application/json            JSON
-*           application/xml             XML
-*           text/xml                    XML
-*           application/x-protobuf      ProtoBuf
-*           application/x-msgpack       MsgPack
-*           application/msgpack         MsgPack
-*           其他                        Form
+GET		 *						   Form
+*		   application/json			JSON
+*		   application/xml			 XML
+*		   text/xml					XML
+*		   application/x-protobuf	  ProtoBuf
+*		   application/x-msgpack	   MsgPack
+*		   application/msgpack		 MsgPack
+*		   其他						Form
 
 // 最后还有数据校验，使用的是 `go-playground/validator.v8`
 ```

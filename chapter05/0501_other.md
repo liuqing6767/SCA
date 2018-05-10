@@ -16,7 +16,7 @@
 ```
 // context.go:40
 type Context struct {
-    // 一系列的错误
+	// 一系列的错误
 	Errors errorMsgs
 }
 
@@ -28,7 +28,7 @@ Error(err error) *Error // 给本次请求添加个错误。将错误收集然�
 ```
 // context.go:40
 type Context struct {
-    // 在context可以设置的值
+	// 在context可以设置的值
 	Keys map[string]interface{}
 }
 
@@ -59,7 +59,7 @@ import (
 func main() {
 	r := gin.New()
 
-    // 使用日志插件
+	// 使用日志插件
 	r.Use(gin.Logger())
 
 	r.GET("/", func(c *gin.Context) {
@@ -67,7 +67,7 @@ func main() {
 	})
 
 
-    // 使用路由组
+	// 使用路由组
 	authGroup := r.Group("/auth", func(c *gin.Context) {
 		token := c.Query("token")
 		if token != "123456" {
@@ -80,7 +80,7 @@ func main() {
 		c.Next()
 	})
 
-    // 注册 /auth/info 处理者
+	// 注册 /auth/info 处理者
 	authGroup.GET("/info", func(c *gin.Context) {
 		c.JSON(200, map[string]string{
 			"id":   "1234",
@@ -105,7 +105,7 @@ type RouterGroup struct {
 	Handlers HandlersChain
 	basePath string
 	engine   *Engine
-	root     bool
+	root	 bool
 }
 
 var _ IRouter = &RouterGroup{}
