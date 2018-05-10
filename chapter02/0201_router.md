@@ -99,12 +99,12 @@ type HandlersChain []HandlerFunc
 // routergroup.go:40
 type RouterGroup struct {
     // 这个路由会参与处理的函数列表
-	Handlers HandlersChain
-	basePath string
-	// 单例存在
+    Handlers HandlersChain
+    basePath string
+    // 单例存在
     engine   *Engine
     // 是否是根
-	root     bool
+    root     bool
 }
 
 ```
@@ -115,13 +115,13 @@ type RouterGroup struct {
 // routergroup.go:70
 func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes {
     // 将basePath和relativePath加起来得到最终的路径
-	absolutePath := group.calculateAbsolutePath(relativePath)
+    absolutePath := group.calculateAbsolutePath(relativePath)
     // 将现有的 Handlers 和 handlers合并起来
-	handlers = group.combineHandlers(handlers)
+    handlers = group.combineHandlers(handlers)
     // 将这个route加入到engine.tree
-	group.engine.addRoute(httpMethod, absolutePath, handlers)
+    group.engine.addRoute(httpMethod, absolutePath, handlers)
     // 返回
-	return group.returnObj()
+    return group.returnObj()
 }
 ```
 
@@ -130,20 +130,20 @@ func (group *RouterGroup) handle(httpMethod, relativePath string, handlers Handl
 ```
 func (engine *Engine) addRoute(method, path string, handlers HandlersChain) {
     // 常规检查
-	assert1(path[0] == '/', "path must begin with '/'")
-	assert1(method != "", "HTTP method can not be empty")
-	assert1(len(handlers) > 0, "there must be at least one handler")
-
-	debugPrintRoute(method, path, handlers)
+    assert1(path[0] == '/', "path must begin with '/'")
+    assert1(method != "", "HTTP method can not be empty")
+    assert1(len(handlers) > 0, "there must be at least one handler")
+    
+    debugPrintRoute(method, path, handlers)
     // 维护engine.trees
-	root := engine.trees.get(method)
-	if root == nil {
-		root = new(node)
-		engine.trees = append(engine.trees, methodTree{method: method, root: root})
-	}
+    root := engine.trees.get(method)
+    if root == nil {
+	root = new(node)
+	engine.trees = append(engine.trees, methodTree{method: method, root: root})
+    }
 
     // 核心，后面一起来讲
-	root.addRoute(path, handlers)
+    root.addRoute(path, handlers)
 }
 ```
 
