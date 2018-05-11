@@ -11,7 +11,7 @@ gin的核心结构体叫 `Engine` ，那引擎到底在哪呢？我想就是它�
 ### 基树
 [基树维基百科](https://en.wikipedia.org/wiki/Radix_tree) 详细介绍了基树这种数据结构。它是gin的router的底层数据结构。
 
-![example from wikipedia](radix_tree.png)
+![example from wikipedia](https://upload.wikimedia.org/wikipedia/commons/a/ae/Patricia_trie.svg)
 
 
 ### 具体实现
