@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="源码解析之:gin #  gin 是一个用golang实现的HTTPweb框架。
+特性 #  官网上描述，gin的特性包括：
+ 快：路由使用基数树，低内存，不使用反射； 中间件注册：一个请求可以被一系列的中间件和最后的action处理 奔溃处理：gin可以捕获panic使应用程序可用 JSON校验：将请求的数据转换为JSON并校验 路由组：更好的组织路由的方式，无限制嵌套而不影响性能 错误管理：可以收集所有的错误 内建渲染方式：JSON，XML和HTML渲染方式 可继承：简单的去创建中间件  代码结构 #  |-- binding 将请求的数据对象化并校验 |-- examples 各种列子 |-- json 提供了另外一种json实现 |-- render 响应 |-- gin.go gin引擎所在 |-- gin_test.go |-- routes_test.go |-- context.go 上下文，将各种功能聚焦到上下文（装饰器模式） |-- context_test.go |-- response_writer.go 响应的数据输出 |-- response_writer_test.go |-- errors.go 错误处理 |-- errors_test.go |-- tree.go 路由的具体实现 |-- tree_test.go |-- routergroup.go |-- routergroup_test.go |-- auth.go 一个基本的HTTP鉴权的中间件 |-- auth_test.go |-- logger.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
+<meta property="og:description" content="源码解析之:gin #  gin 是一个用golang实现的HTTPweb框架。
+特性 #  官网上描述，gin的特性包括：
+ 快：路由使用基数树，低内存，不使用反射； 中间件注册：一个请求可以被一系列的中间件和最后的action处理 奔溃处理：gin可以捕获panic使应用程序可用 JSON校验：将请求的数据转换为JSON并校验 路由组：更好的组织路由的方式，无限制嵌套而不影响性能 错误管理：可以收集所有的错误 内建渲染方式：JSON，XML和HTML渲染方式 可继承：简单的去创建中间件  代码结构 #  |-- binding 将请求的数据对象化并校验 |-- examples 各种列子 |-- json 提供了另外一种json实现 |-- render 响应 |-- gin.go gin引擎所在 |-- gin_test.go |-- routes_test.go |-- context.go 上下文，将各种功能聚焦到上下文（装饰器模式） |-- context_test.go |-- response_writer.go 响应的数据输出 |-- response_writer_test.go |-- errors.go 错误处理 |-- errors_test.go |-- tree.go 路由的具体实现 |-- tree_test.go |-- routergroup.go |-- routergroup_test.go |-- auth.go 一个基本的HTTP鉴权的中间件 |-- auth_test.go |-- logger." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/SCA/docs/gin-gonic_gin/0001_preface/" /><meta property="article:section" content="docs" />
+
+
+
+<title>0001 Preface | SourceCodeAnalysis</title>
+<link rel="manifest" href="/SCA/manifest.json">
+<link rel="icon" href="/SCA/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/SCA/book.min.97cfda4f5e3c9fa49a2bf8d401f4ddc0eec576c99cdcf6afbec19173200c37db.css" >
+  <script defer src="/SCA/flexsearch.min.js"></script>
+  <script defer src="/SCA/en.search.min.86e95a8997e1eb2108ee7716c64b319afdcbc5bb8f54772bf3d3b8fabe82073f.js" ></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/SCA/"><span>SourceCodeAnalysis</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-068369a7839e687a60defc326c6ae3b1" class="toggle" checked />
+    <label for="section-068369a7839e687a60defc326c6ae3b1" class="flex justify-between">
+      <a role="button" class="">gin-gonic/gin</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0001_preface/" class=" active">0001 Preface</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0101_flow/" class="">0101 Flow</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0200/" class="">200th</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0201_router/" class="">0201 Router</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0202_radix_tree/" class="">0202 Radix Tree</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0301_request/" class="">0301 Request</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0401_response/" class="">0401 Response</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0501_other/" class="">0501 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-6e8bbf282ebf66cf249a9e198c334299" class="toggle"  />
+    <label for="section-6e8bbf282ebf66cf249a9e198c334299" class="flex justify-between">
+      <a role="button" class="">tal-tech/go-zero</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="toggle"  />
+    <label for="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="flex justify-between">
+      <a role="button" class="">Core</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/01_bloom_filter/" class="">01 Bloom Filter</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/02_break/" class="">02 Break</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/03_collection/" class="">03 Collection</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/04_executor/" class="">04 Executor</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/05_fx/" class="">05 Fx</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/06_hash/" class="">06 Hash</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/09_other/" class="">09 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/SCA/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>0001 Preface</strong>
+
+  <label for="toc-control">
+    
+    <img src="/SCA/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#源码解析之gin">源码解析之:gin</a></li>
+    <li><a href="#特性">特性</a></li>
+    <li><a href="#代码结构">代码结构</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="源码解析之gin">
+  源码解析之:gin
+  <a class="anchor" href="#%e6%ba%90%e7%a0%81%e8%a7%a3%e6%9e%90%e4%b9%8bgin">#</a>
+</h1>
+<p><a href="https://github.com/gin-gonic/gin">gin</a> 是一个用golang实现的HTTPweb框架。</p>
+<h1 id="特性">
+  特性
+  <a class="anchor" href="#%e7%89%b9%e6%80%a7">#</a>
+</h1>
+<p><a href="https://gin-gonic.github.io/gin/">官网上</a>描述，gin的特性包括：</p>
+<ul>
+<li>快：路由使用<code>基数树</code>，低内存，不使用反射；</li>
+<li>中间件注册：一个请求可以被一系列的中间件和最后的action处理</li>
+<li>奔溃处理：gin可以捕获panic使应用程序可用</li>
+<li>JSON校验：将请求的数据转换为JSON并校验</li>
+<li>路由组：更好的组织路由的方式，无限制嵌套而不影响性能</li>
+<li>错误管理：可以收集所有的错误</li>
+<li>内建渲染方式：JSON，XML和HTML渲染方式</li>
+<li>可继承：简单的去创建中间件</li>
+</ul>
+<h1 id="代码结构">
+  代码结构
+  <a class="anchor" href="#%e4%bb%a3%e7%a0%81%e7%bb%93%e6%9e%84">#</a>
+</h1>
+<pre tabindex="0"><code>|-- binding                     将请求的数据对象化并校验
+|-- examples                    各种列子
+|-- json                        提供了另外一种json实现
+|-- render                      响应
+
+|-- gin.go                      gin引擎所在
+|-- gin_test.go
+|-- routes_test.go
+|-- context.go                  上下文，将各种功能聚焦到上下文（装饰器模式）
+|-- context_test.go
+|-- response_writer.go          响应的数据输出
+|-- response_writer_test.go
+|-- errors.go                   错误处理
+|-- errors_test.go
+|-- tree.go                     路由的具体实现
+|-- tree_test.go
+|-- routergroup.go
+|-- routergroup_test.go
+|-- auth.go                     一个基本的HTTP鉴权的中间件
+|-- auth_test.go
+|-- logger.go                   一个日志中间件
+|-- logger_test.go
+|-- recovery.go                 一个崩溃处理插件
+|-- recovery_test.go
+
+|-- mode.go                     应用模式
+|-- mode_test.go
+|-- utils.go                    杂碎
+|-- utils_test.go
+</code></pre><p>接下来的章节将按照各个模块进行合-分讲解，让优秀不再神秘。分析版本为v1.2。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+  <div>
+    <a class="flex align-center" href="https://github.com/liuximu/sca/edit/master/content/docs/gin-gonic_gin/0001_preface.md" target="_blank" rel="noopener">
+      <img src="/SCA/svg/edit.svg" class="book-icon" alt="Edit" />
+      <span>Edit this page</span>
+    </a>
+  </div>
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#源码解析之gin">源码解析之:gin</a></li>
+    <li><a href="#特性">特性</a></li>
+    <li><a href="#代码结构">代码结构</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

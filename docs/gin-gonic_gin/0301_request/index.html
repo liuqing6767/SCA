@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="请求 #  其实在流程 中就有讲到。
+在请求来到服务器后，Context对象会生成用来串流程： 和请求有关的字段包括:
+// context.go:40 type Context struct { // ServeHTTP的第二个参数: request Request *http.Request // URL里面的参数，比如：/xx/:id Params Params } 获取restful接口的参数 #  在路由解析时会初始化 Params 提供Get函数：
+Param(key string) string 获取请求数据： #  // Header GetHeader(key string) string // c.Request.Body GetRawData() ([]byte, error) // Cookie Cookie(name string) (string, error) //从GET参数中拿值，比如 /path?id=john // 实现原理：调用系统库：*http.Request.URL.Query() GetQueryArray(key string) ([]string, bool) GetQuery(key string)(string, bool) Query(key string) string DefaultQuery(key, defaultValue string) string GetQueryArray(key string) ([]string, bool) QueryArray(key string) []string //从POST中拿数据 // 实现原理：调用系统库：*http.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
+<meta property="og:description" content="请求 #  其实在流程 中就有讲到。
+在请求来到服务器后，Context对象会生成用来串流程： 和请求有关的字段包括:
+// context.go:40 type Context struct { // ServeHTTP的第二个参数: request Request *http.Request // URL里面的参数，比如：/xx/:id Params Params } 获取restful接口的参数 #  在路由解析时会初始化 Params 提供Get函数：
+Param(key string) string 获取请求数据： #  // Header GetHeader(key string) string // c.Request.Body GetRawData() ([]byte, error) // Cookie Cookie(name string) (string, error) //从GET参数中拿值，比如 /path?id=john // 实现原理：调用系统库：*http.Request.URL.Query() GetQueryArray(key string) ([]string, bool) GetQuery(key string)(string, bool) Query(key string) string DefaultQuery(key, defaultValue string) string GetQueryArray(key string) ([]string, bool) QueryArray(key string) []string //从POST中拿数据 // 实现原理：调用系统库：*http." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/SCA/docs/gin-gonic_gin/0301_request/" /><meta property="article:section" content="docs" />
+
+
+
+<title>0301 Request | SourceCodeAnalysis</title>
+<link rel="manifest" href="/SCA/manifest.json">
+<link rel="icon" href="/SCA/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/SCA/book.min.97cfda4f5e3c9fa49a2bf8d401f4ddc0eec576c99cdcf6afbec19173200c37db.css" >
+  <script defer src="/SCA/flexsearch.min.js"></script>
+  <script defer src="/SCA/en.search.min.86e95a8997e1eb2108ee7716c64b319afdcbc5bb8f54772bf3d3b8fabe82073f.js" ></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/SCA/"><span>SourceCodeAnalysis</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-068369a7839e687a60defc326c6ae3b1" class="toggle" checked />
+    <label for="section-068369a7839e687a60defc326c6ae3b1" class="flex justify-between">
+      <a role="button" class="">gin-gonic/gin</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0001_preface/" class="">0001 Preface</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0101_flow/" class="">0101 Flow</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0200/" class="">200th</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0201_router/" class="">0201 Router</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0202_radix_tree/" class="">0202 Radix Tree</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0301_request/" class=" active">0301 Request</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0401_response/" class="">0401 Response</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0501_other/" class="">0501 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-6e8bbf282ebf66cf249a9e198c334299" class="toggle"  />
+    <label for="section-6e8bbf282ebf66cf249a9e198c334299" class="flex justify-between">
+      <a role="button" class="">tal-tech/go-zero</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="toggle"  />
+    <label for="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="flex justify-between">
+      <a role="button" class="">Core</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/01_bloom_filter/" class="">01 Bloom Filter</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/02_break/" class="">02 Break</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/03_collection/" class="">03 Collection</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/04_executor/" class="">04 Executor</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/05_fx/" class="">05 Fx</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/06_hash/" class="">06 Hash</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/09_other/" class="">09 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/SCA/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>0301 Request</strong>
+
+  <label for="toc-control">
+    
+    <img src="/SCA/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#请求">请求</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#获取restful接口的参数">获取restful接口的参数</a></li>
+            <li><a href="#获取请求数据">获取请求数据：</a></li>
+            <li><a href="#数据对象化">数据对象化</a></li>
+            <li><a href="#其他工具方法">其他工具方法</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="请求">
+  请求
+  <a class="anchor" href="#%e8%af%b7%e6%b1%82">#</a>
+</h1>
+<p>其实在<a href="../chaptero1/0101_flow.md">流程</a> 中就有讲到。</p>
+<p>在请求来到服务器后，Context对象会生成用来串流程：
+和请求有关的字段包括:</p>
+<pre tabindex="0"><code>// context.go:40
+type Context struct {
+    // ServeHTTP的第二个参数: request
+    Request   *http.Request
+
+    // URL里面的参数，比如：/xx/:id  
+    Params   Params
+}
+</code></pre><h3 id="获取restful接口的参数">
+  获取restful接口的参数
+  <a class="anchor" href="#%e8%8e%b7%e5%8f%96restful%e6%8e%a5%e5%8f%a3%e7%9a%84%e5%8f%82%e6%95%b0">#</a>
+</h3>
+<p>在路由解析时会初始化 <code>Params</code>
+提供Get函数：</p>
+<pre tabindex="0"><code>Param(key string) string    
+</code></pre><h3 id="获取请求数据">
+  获取请求数据：
+  <a class="anchor" href="#%e8%8e%b7%e5%8f%96%e8%af%b7%e6%b1%82%e6%95%b0%e6%8d%ae">#</a>
+</h3>
+<pre tabindex="0"><code>// Header
+GetHeader(key string) string
+
+// c.Request.Body
+GetRawData() ([]byte, error)
+
+// Cookie
+Cookie(name string) (string, error)
+
+//从GET参数中拿值，比如 /path?id=john
+// 实现原理：调用系统库：*http.Request.URL.Query()
+GetQueryArray(key string) ([]string, bool)  
+GetQuery(key string)(string, bool)
+Query(key string) string
+DefaultQuery(key, defaultValue string) string
+GetQueryArray(key string) ([]string, bool)
+QueryArray(key string) []string
+
+//从POST中拿数据
+// 实现原理：调用系统库：*http.Request.PostForm() 和 *http.Request.MultipartForm.Value
+GetPostFormArray(key string) ([]string, bool)
+PostFormArray(key string) []string 
+GetPostForm(key string) (string, bool)
+PostForm(key string) string
+DefaultPostForm(key, defaultValue string) string
+
+// 文件
+// 实现原理：调用系统库：*http.Request.FormFile()
+FormFile(name string) (*multipart.FileHeader, error)
+MultipartForm() (*multipart.Form, error)
+SaveUploadedFile(file *multipart.FileHeader, dst string) error
+</code></pre><h3 id="数据对象化">
+  数据对象化
+  <a class="anchor" href="#%e6%95%b0%e6%8d%ae%e5%af%b9%e8%b1%a1%e5%8c%96">#</a>
+</h3>
+<pre tabindex="0"><code>Bind(obj interface{}) error //根据Content-Type绑定数据
+BindJSON(obj interface{}) error
+BindQuery(obj interface{}) error
+
+//--- Should ok, else return error
+ShouldBindJSON(obj interface{}) error 
+ShouldBind(obj interface{}) error
+ShouldBindJSON(obj interface{}) error
+ShouldBindQuery(obj interface{}) error
+
+//--- Must ok, else SetError
+MustBindJSON(obj interface{}) error 
+</code></pre><p>我们仔细看看实现逻辑</p>
+<pre tabindex="0"><code>// 首先有一个Binding接口，
+//binding/binding.go:27
+type Binding interface {
+    // 绑定器的名称
+    Name() string
+    // 进行数据绑定
+    Bind(*http.Request, interface{}) error
+}
+
+// 然后有一个矩阵得到binding对象
+//binding/binding.go:70
+method      content-type                binding
+-----------------------------------------------
+GET         *                           Form
+*           application/json            JSON
+*           application/xml             XML
+*           text/xml                    XML
+*           application/x-protobuf      ProtoBuf
+*           application/x-msgpack       MsgPack
+*           application/msgpack         MsgPack
+*           其他                        Form
+
+// 最后还有数据校验，使用的是 `go-playground/validator.v8`
+</code></pre><h3 id="其他工具方法">
+  其他工具方法
+  <a class="anchor" href="#%e5%85%b6%e4%bb%96%e5%b7%a5%e5%85%b7%e6%96%b9%e6%b3%95">#</a>
+</h3>
+<pre tabindex="0"><code>ClientIP() string
+ContentType() string
+IsWebsocket() bool
+</code></pre></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+  <div>
+    <a class="flex align-center" href="https://github.com/liuximu/sca/edit/master/content/docs/gin-gonic_gin/0301_request.md" target="_blank" rel="noopener">
+      <img src="/SCA/svg/edit.svg" class="book-icon" alt="Edit" />
+      <span>Edit this page</span>
+    </a>
+  </div>
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#请求">请求</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#获取restful接口的参数">获取restful接口的参数</a></li>
+            <li><a href="#获取请求数据">获取请求数据：</a></li>
+            <li><a href="#数据对象化">数据对象化</a></li>
+            <li><a href="#其他工具方法">其他工具方法</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

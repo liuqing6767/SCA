@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="一致性hash #  状态：编辑中
+包 core/hash 实现了一个一致性hash。
+hash 和 一致性hash #  hash函数将一个字符串（字节数组）转换为一个数值，比如md5。
+在业务开发中，经常会使用hash函数将数据打散到多个存储实例上，比如：
+ 数据库水平分表：hash(用户的名字) 后和总表数取模确定存储在哪张表中 缓存集群挑选：hask(key) 后和 缓存集群格式取模确定数据缓存在哪个缓存集群中  realAddr = hash(key) % node_count 这种方式，在instance_count 不变的情况下是工作良好的，但是真实的生产环境却是动态的，就会有如下问题：
+ 容错性：实例宕机了，某个实例下线后，最坏情况（第一个实例下线）会导致所有的数据都失效，最好情况（最后一个实例下线）是 1/n 的数据失效 扩展性：添加新实例同上  一致性hash就是用来解决这个问题的。
+普通的算法是将N个物理节点组成一个环，通过和N取模确定到底使用哪个具体的节点，每个节点对应一个物理节点
+一致性hash先得到一个有N个虚拟节点的环，我们先认为N = 2^32 - 1。
+ 将每个机器节点hash后与N取模能够得到机器在虚拟环的位置P 通过Key和N取模确定是哪个虚拟节点n 顺着虚拟环顺时针查找到的第一个P就是需要使用的物理节点  我们来分析一下一致性hash的表现：
+ 容错性：实例宕机了，某个实例下线后，总是 1/n 的数据失效 扩展性：添加新实例，总是少于 1/n的数据受影响  有一个地方需要特别注意一下： 将每个机器节点hash后与N取模能够得到机器在虚拟环的位置P 这步，如果做得不够均匀，就会导致 数据倾斜，也就是每个物理节点的负载不一样。
+比如有N物理节点，它们的P 相减为 2^32 / N 才比较对，极端情况P相差1，那么就有一台物理节点几乎承担所有的负载。
+解决这个问题的一种方法为对每个物理节点进行多个hash，每次计算的结果为一个虚拟节点。同一个物理节点的多个虚拟节点都是该物理节点服务的范围。通过多个hash，降低数据倾斜的概率。
+一致性hash的API #  type ( HashFunc func(data []byte) uint64 ConsistentHash struct { // 将key转换为int的函数 	hashFunc HashFunc // 副本的数量，也就是上面虚拟节点的数量 	replicas int // 	keys []uint64 // 	ring map[uint64][]interface{} // 用来确认某个节点是否存在的冗余数据 	nodes map[string]lang.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
+<meta property="og:description" content="一致性hash #  状态：编辑中
+包 core/hash 实现了一个一致性hash。
+hash 和 一致性hash #  hash函数将一个字符串（字节数组）转换为一个数值，比如md5。
+在业务开发中，经常会使用hash函数将数据打散到多个存储实例上，比如：
+ 数据库水平分表：hash(用户的名字) 后和总表数取模确定存储在哪张表中 缓存集群挑选：hask(key) 后和 缓存集群格式取模确定数据缓存在哪个缓存集群中  realAddr = hash(key) % node_count 这种方式，在instance_count 不变的情况下是工作良好的，但是真实的生产环境却是动态的，就会有如下问题：
+ 容错性：实例宕机了，某个实例下线后，最坏情况（第一个实例下线）会导致所有的数据都失效，最好情况（最后一个实例下线）是 1/n 的数据失效 扩展性：添加新实例同上  一致性hash就是用来解决这个问题的。
+普通的算法是将N个物理节点组成一个环，通过和N取模确定到底使用哪个具体的节点，每个节点对应一个物理节点
+一致性hash先得到一个有N个虚拟节点的环，我们先认为N = 2^32 - 1。
+ 将每个机器节点hash后与N取模能够得到机器在虚拟环的位置P 通过Key和N取模确定是哪个虚拟节点n 顺着虚拟环顺时针查找到的第一个P就是需要使用的物理节点  我们来分析一下一致性hash的表现：
+ 容错性：实例宕机了，某个实例下线后，总是 1/n 的数据失效 扩展性：添加新实例，总是少于 1/n的数据受影响  有一个地方需要特别注意一下： 将每个机器节点hash后与N取模能够得到机器在虚拟环的位置P 这步，如果做得不够均匀，就会导致 数据倾斜，也就是每个物理节点的负载不一样。
+比如有N物理节点，它们的P 相减为 2^32 / N 才比较对，极端情况P相差1，那么就有一台物理节点几乎承担所有的负载。
+解决这个问题的一种方法为对每个物理节点进行多个hash，每次计算的结果为一个虚拟节点。同一个物理节点的多个虚拟节点都是该物理节点服务的范围。通过多个hash，降低数据倾斜的概率。
+一致性hash的API #  type ( HashFunc func(data []byte) uint64 ConsistentHash struct { // 将key转换为int的函数 	hashFunc HashFunc // 副本的数量，也就是上面虚拟节点的数量 	replicas int // 	keys []uint64 // 	ring map[uint64][]interface{} // 用来确认某个节点是否存在的冗余数据 	nodes map[string]lang." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/SCA/docs/tal-tech_go-zero/core/06_hash/" /><meta property="article:section" content="docs" />
+
+
+
+<title>06 Hash | SourceCodeAnalysis</title>
+<link rel="manifest" href="/SCA/manifest.json">
+<link rel="icon" href="/SCA/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/SCA/book.min.97cfda4f5e3c9fa49a2bf8d401f4ddc0eec576c99cdcf6afbec19173200c37db.css" >
+  <script defer src="/SCA/flexsearch.min.js"></script>
+  <script defer src="/SCA/en.search.min.86e95a8997e1eb2108ee7716c64b319afdcbc5bb8f54772bf3d3b8fabe82073f.js" ></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/SCA/"><span>SourceCodeAnalysis</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-068369a7839e687a60defc326c6ae3b1" class="toggle"  />
+    <label for="section-068369a7839e687a60defc326c6ae3b1" class="flex justify-between">
+      <a role="button" class="">gin-gonic/gin</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0001_preface/" class="">0001 Preface</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0101_flow/" class="">0101 Flow</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0200/" class="">200th</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0201_router/" class="">0201 Router</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0202_radix_tree/" class="">0202 Radix Tree</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0301_request/" class="">0301 Request</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0401_response/" class="">0401 Response</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0501_other/" class="">0501 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-6e8bbf282ebf66cf249a9e198c334299" class="toggle" checked />
+    <label for="section-6e8bbf282ebf66cf249a9e198c334299" class="flex justify-between">
+      <a role="button" class="">tal-tech/go-zero</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="toggle" checked />
+    <label for="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="flex justify-between">
+      <a role="button" class="">Core</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/01_bloom_filter/" class="">01 Bloom Filter</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/02_break/" class="">02 Break</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/03_collection/" class="">03 Collection</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/04_executor/" class="">04 Executor</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/05_fx/" class="">05 Fx</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/06_hash/" class=" active">06 Hash</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/09_other/" class="">09 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/SCA/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>06 Hash</strong>
+
+  <label for="toc-control">
+    
+    <img src="/SCA/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#一致性hash">一致性hash</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#hash-和-一致性hash">hash 和 一致性hash</a></li>
+            <li><a href="#一致性hash的api">一致性hash的API</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="一致性hash">
+  一致性hash
+  <a class="anchor" href="#%e4%b8%80%e8%87%b4%e6%80%a7hash">#</a>
+</h1>
+<p>状态：编辑中</p>
+<p>包 <code>core/hash</code> 实现了一个一致性hash。</p>
+<h3 id="hash-和-一致性hash">
+  hash 和 一致性hash
+  <a class="anchor" href="#hash-%e5%92%8c-%e4%b8%80%e8%87%b4%e6%80%a7hash">#</a>
+</h3>
+<p>hash函数将一个字符串（字节数组）转换为一个数值，比如md5。</p>
+<p>在业务开发中，经常会使用hash函数将数据打散到多个存储实例上，比如：</p>
+<ul>
+<li>数据库水平分表：hash(用户的名字) 后和总表数取模确定存储在哪张表中</li>
+<li>缓存集群挑选：hask(key) 后和 缓存集群格式取模确定数据缓存在哪个缓存集群中</li>
+</ul>
+<p><code>realAddr =  hash(key) % node_count</code> 这种方式，在instance_count 不变的情况下是工作良好的，但是真实的生产环境却是动态的，就会有如下问题：</p>
+<ul>
+<li>容错性：实例宕机了，某个实例下线后，最坏情况（第一个实例下线）会导致所有的数据都失效，最好情况（最后一个实例下线）是 1/n 的数据失效</li>
+<li>扩展性：添加新实例同上</li>
+</ul>
+<p>一致性hash就是用来解决这个问题的。</p>
+<p>普通的算法是将N个物理节点组成一个环，通过和N取模确定到底使用哪个具体的节点，每个节点对应一个物理节点</p>
+<p>一致性hash先得到一个有N个虚拟节点的环，我们先认为N = 2^32 - 1。</p>
+<ul>
+<li>将每个机器节点hash后与N取模能够得到机器在虚拟环的位置P</li>
+<li>通过Key和N取模确定是哪个虚拟节点n</li>
+<li>顺着虚拟环顺时针查找到的第一个P就是需要使用的物理节点</li>
+</ul>
+<p>我们来分析一下一致性hash的表现：</p>
+<ul>
+<li>容错性：实例宕机了，某个实例下线后，总是 1/n 的数据失效</li>
+<li>扩展性：添加新实例，总是少于 1/n的数据受影响</li>
+</ul>
+<p>有一个地方需要特别注意一下： <strong>将每个机器节点hash后与N取模能够得到机器在虚拟环的位置P</strong> 这步，如果做得不够均匀，就会导致 数据倾斜，也就是每个物理节点的负载不一样。</p>
+<p>比如有N物理节点，它们的P 相减为 2^32 / N 才比较对，极端情况P相差1，那么就有一台物理节点几乎承担所有的负载。</p>
+<p>解决这个问题的一种方法为对每个物理节点进行多个hash，每次计算的结果为一个虚拟节点。同一个物理节点的多个虚拟节点都是该物理节点服务的范围。通过多个hash，降低数据倾斜的概率。</p>
+<h3 id="一致性hash的api">
+  一致性hash的API
+  <a class="anchor" href="#%e4%b8%80%e8%87%b4%e6%80%a7hash%e7%9a%84api">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> (
+	<span style="color:#a6e22e">HashFunc</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">data</span> []<span style="color:#66d9ef">byte</span>) <span style="color:#66d9ef">uint64</span>
+
+	<span style="color:#a6e22e">ConsistentHash</span> <span style="color:#66d9ef">struct</span> {
+    <span style="color:#75715e">// 将key转换为int的函数
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">hashFunc</span> <span style="color:#a6e22e">HashFunc</span>
+    <span style="color:#75715e">// 副本的数量，也就是上面虚拟节点的数量
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">replicas</span> <span style="color:#66d9ef">int</span>
+    <span style="color:#75715e">// 
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">keys</span>     []<span style="color:#66d9ef">uint64</span>
+    <span style="color:#75715e">// 
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">ring</span>     <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">uint64</span>][]<span style="color:#66d9ef">interface</span>{}
+    <span style="color:#75715e">// 用来确认某个节点是否存在的冗余数据
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">nodes</span>    <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">lang</span>.<span style="color:#a6e22e">PlaceholderType</span>
+		<span style="color:#a6e22e">lock</span>     <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">RWMutex</span>
+	}
+)
+
+
+<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">node</span> <span style="color:#66d9ef">interface</span>{}) 
+<span style="color:#a6e22e">AddWithReplicas</span>(<span style="color:#a6e22e">node</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">replicas</span> <span style="color:#66d9ef">int</span>) 
+<span style="color:#a6e22e">AddWithWeight</span>(<span style="color:#a6e22e">node</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">weight</span> <span style="color:#66d9ef">int</span>)
+
+<span style="color:#a6e22e">Get</span>(<span style="color:#a6e22e">v</span> <span style="color:#66d9ef">interface</span>{}) (<span style="color:#66d9ef">interface</span>{}, <span style="color:#66d9ef">bool</span>)
+
+<span style="color:#a6e22e">Remove</span>(<span style="color:#a6e22e">node</span> <span style="color:#66d9ef">interface</span>{}) 
+</code></pre></div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+  <div>
+    <a class="flex align-center" href="https://github.com/liuximu/sca/edit/master/content/docs/tal-tech_go-zero/core/06_hash.md" target="_blank" rel="noopener">
+      <img src="/SCA/svg/edit.svg" class="book-icon" alt="Edit" />
+      <span>Edit this page</span>
+    </a>
+  </div>
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#一致性hash">一致性hash</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#hash-和-一致性hash">hash 和 一致性hash</a></li>
+            <li><a href="#一致性hash的api">一致性hash的API</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="流程 #  从不同的视角去看待web应用的流程：
+ 使用者视角：程序员如何使用gin来编写业务逻辑 应用初始化：当进程启动时gin内部是如何初始化的 请求生命周期：当一个HTTP请求来到服务器时后如何转化为响应  说这些之前了解一下Context这个结构体
+Context结构体 #  简单介绍一下gin框架里面最重要的结构体Context，另外一个最重要的结构体是Engine，它作为单例存在；而Context是从对象池中得到。
+// Context作为一个数据结构在中间件中传递本次请求的各种数据、管理流程，进行响应 // context.go:40 type Context struct { // ServeHTTP的第二个参数: request Request *http.Request // 用来响应 Writer ResponseWriter writermem responseWriter // URL里面的参数，比如：/xx/:id Params Params // 参与的处理者（中间件 &#43; 请求处理者列表） handlers HandlersChain // 当前处理到的handler的下标 index int8 // Engine单例 engine *Engine // 在context可以设置的值 Keys map[string]interface{} // 一系列的错误 Errors errorMsgs // Accepted defines a list of manually accepted formats for content negotiation.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
+<meta property="og:description" content="流程 #  从不同的视角去看待web应用的流程：
+ 使用者视角：程序员如何使用gin来编写业务逻辑 应用初始化：当进程启动时gin内部是如何初始化的 请求生命周期：当一个HTTP请求来到服务器时后如何转化为响应  说这些之前了解一下Context这个结构体
+Context结构体 #  简单介绍一下gin框架里面最重要的结构体Context，另外一个最重要的结构体是Engine，它作为单例存在；而Context是从对象池中得到。
+// Context作为一个数据结构在中间件中传递本次请求的各种数据、管理流程，进行响应 // context.go:40 type Context struct { // ServeHTTP的第二个参数: request Request *http.Request // 用来响应 Writer ResponseWriter writermem responseWriter // URL里面的参数，比如：/xx/:id Params Params // 参与的处理者（中间件 &#43; 请求处理者列表） handlers HandlersChain // 当前处理到的handler的下标 index int8 // Engine单例 engine *Engine // 在context可以设置的值 Keys map[string]interface{} // 一系列的错误 Errors errorMsgs // Accepted defines a list of manually accepted formats for content negotiation." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/SCA/docs/gin-gonic_gin/0101_flow/" /><meta property="article:section" content="docs" />
+
+
+
+<title>0101 Flow | SourceCodeAnalysis</title>
+<link rel="manifest" href="/SCA/manifest.json">
+<link rel="icon" href="/SCA/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/SCA/book.min.97cfda4f5e3c9fa49a2bf8d401f4ddc0eec576c99cdcf6afbec19173200c37db.css" >
+  <script defer src="/SCA/flexsearch.min.js"></script>
+  <script defer src="/SCA/en.search.min.86e95a8997e1eb2108ee7716c64b319afdcbc5bb8f54772bf3d3b8fabe82073f.js" ></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/SCA/"><span>SourceCodeAnalysis</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-068369a7839e687a60defc326c6ae3b1" class="toggle" checked />
+    <label for="section-068369a7839e687a60defc326c6ae3b1" class="flex justify-between">
+      <a role="button" class="">gin-gonic/gin</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0001_preface/" class="">0001 Preface</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0101_flow/" class=" active">0101 Flow</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0200/" class="">200th</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0201_router/" class="">0201 Router</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0202_radix_tree/" class="">0202 Radix Tree</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0301_request/" class="">0301 Request</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0401_response/" class="">0401 Response</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/gin-gonic_gin/0501_other/" class="">0501 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-6e8bbf282ebf66cf249a9e198c334299" class="toggle"  />
+    <label for="section-6e8bbf282ebf66cf249a9e198c334299" class="flex justify-between">
+      <a role="button" class="">tal-tech/go-zero</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="toggle"  />
+    <label for="section-2ca4f21c93ca8ec9f0714b747485f1a5" class="flex justify-between">
+      <a role="button" class="">Core</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/01_bloom_filter/" class="">01 Bloom Filter</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/02_break/" class="">02 Break</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/03_collection/" class="">03 Collection</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/04_executor/" class="">04 Executor</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/05_fx/" class="">05 Fx</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/06_hash/" class="">06 Hash</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/SCA/docs/tal-tech_go-zero/core/09_other/" class="">09 Other</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/SCA/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>0101 Flow</strong>
+
+  <label for="toc-control">
+    
+    <img src="/SCA/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#流程">流程</a>
+      <ul>
+        <li><a href="#context结构体">Context结构体</a></li>
+        <li><a href="#使用者视角">使用者视角</a>
+          <ul>
+            <li><a href="#简单的例子">简单的例子</a></li>
+            <li><a href="#使用路由组和中间件">使用路由组和中间件</a></li>
+          </ul>
+        </li>
+        <li><a href="#应用初始化">应用初始化</a></li>
+        <li><a href="#请求生命周期">请求生命周期</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="流程">
+  流程
+  <a class="anchor" href="#%e6%b5%81%e7%a8%8b">#</a>
+</h1>
+<p>从不同的视角去看待web应用的流程：</p>
+<ul>
+<li>使用者视角：程序员如何使用gin来编写业务逻辑</li>
+<li>应用初始化：当进程启动时gin内部是如何初始化的</li>
+<li>请求生命周期：当一个HTTP请求来到服务器时后如何转化为响应</li>
+</ul>
+<p>说这些之前了解一下Context这个结构体</p>
+<h2 id="context结构体">
+  Context结构体
+  <a class="anchor" href="#context%e7%bb%93%e6%9e%84%e4%bd%93">#</a>
+</h2>
+<p>简单介绍一下gin框架里面最重要的结构体<code>Context</code>，另外一个最重要的结构体是<code>Engine</code>，它作为单例存在；而<code>Context</code>是从对象池中得到。</p>
+<pre tabindex="0"><code>// Context作为一个数据结构在中间件中传递本次请求的各种数据、管理流程，进行响应
+// context.go:40
+type Context struct {
+    // ServeHTTP的第二个参数: request
+    Request   *http.Request
+
+    // 用来响应 
+    Writer    ResponseWriter
+    writermem responseWriter
+
+    // URL里面的参数，比如：/xx/:id  
+    Params   Params
+    // 参与的处理者（中间件 + 请求处理者列表）
+    handlers HandlersChain
+    // 当前处理到的handler的下标
+    index    int8
+
+    // Engine单例
+    engine *Engine
+
+    // 在context可以设置的值
+    Keys map[string]interface{}
+
+    // 一系列的错误
+    Errors errorMsgs
+
+    // Accepted defines a list of manually accepted formats for content negotiation.
+    Accepted []string
+}
+
+// response_writer.go:20
+type ResponseWriter interface {
+    http.ResponseWriter //嵌入接口
+    http.Hijacker       //嵌入接口
+    http.Flusher        //嵌入接口
+    http.CloseNotifier  //嵌入接口
+
+    // 返回当前请求的 response status code
+    Status() int
+
+    // 返回写入 http body的字节数
+    Size() int
+
+    // 写string
+    WriteString(string) (int, error)
+
+    //是否写出
+    Written() bool
+
+    // 强制写htp header (状态码 + headers)
+    WriteHeaderNow()
+}
+
+// response_writer.go:40
+// 实现 ResponseWriter 接口
+type responseWriter struct {
+    http.ResponseWriter
+    size   int
+    status int
+}
+
+
+type errorMsgs []*Error
+
+
+// 每当一个请求来到服务器，都会从对象池中拿到一个context。其函数有：
+// **** 创建
+reset()                 //从对象池中拿出来后需要初始化
+Copy() *Context         //克隆，用于goroute中
+HandlerName() string    //得到最后那个处理者的名字
+Handler()               //得到最后那个Handler
+
+// **** 流程控制
+Next()                  // 只能在中间件中使用，依次调用各个处理者
+IsAborted() bool    
+Abort()                 // 废弃
+AbortWithStatusJson(code int, jsonObj interface{})
+AbortWithError(code int, err error) *Error
+
+// **** 错误管理
+Error(err error) *Error // 给本次请求添加个错误。将错误收集然后用中间件统一处理（打日志|入库）是一个比较好的方案
+
+// **** 元数据管理
+Set(key string, value interface{})  //本次请求用户设置各种数据 (Keys 字段)
+Get(key string)(value interface{}, existed bool)
+MustGet(key string)(value interface{})
+GetString(key string) string
+GetBool(key string) bool
+GetInt(key string) int
+GetInt64(key string) int64
+GetFloat64(key string) float64
+GetTime(key string) time.Time
+GetDuration(key string) time.Duration
+GetStringSlice(key string) []string
+GetStringMap(key string) map[string]interface{}
+GetStringMapString(key string) map[string]string
+GetStringMapStringSlice(key string) map[string][]string
+
+// **** 输入数据
+//从URL中拿值，比如 /user/:id =&gt; /user/john
+Param(key string) string    
+
+//从GET参数中拿值，比如 /path?id=john
+GetQueryArray(key string) ([]string, bool)  
+GetQuery(key string)(string, bool)
+Query(key string) string
+DefaultQuery(key, defaultValue string) string
+GetQueryArray(key string) ([]string, bool)
+QueryArray(key string) []string
+
+//从POST中拿数据
+GetPostFormArray(key string) ([]string, bool)
+PostFormArray(key string) []string 
+GetPostForm(key string) (string, bool)
+PostForm(key string) string
+DefaultPostForm(key, defaultValue string) string
+
+// 文件
+FormFile(name string) (*multipart.FileHeader, error)
+MultipartForm() (*multipart.Form, error)
+SaveUploadedFile(file *multipart.FileHeader, dst string) error
+
+// 数据绑定
+Bind(obj interface{}) error //根据Content-Type绑定数据
+BindJSON(obj interface{}) error
+BindQuery(obj interface{}) error
+
+//--- Should ok, else return error
+ShouldBindJSON(obj interface{}) error 
+ShouldBind(obj interface{}) error
+ShouldBindJSON(obj interface{}) error
+ShouldBindQuery(obj interface{}) error
+
+//--- Must ok, else SetError
+MustBindJSON(obj interface{}) error 
+
+ClientIP() string
+ContentType() string
+IsWebsocket() bool
+
+// **** 输出数据
+Status(code int)            // 设置response code
+Header(key, value string)   // 设置header
+GetHeader(key string) string
+
+GetRawData() ([]byte, error)
+
+Cookie(name string) (string, error)     // 设置cookie
+SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
+
+Render(code int, r render.Render)      // 数据渲染
+HTML(code int, name string, obj interface{})    //HTML
+JSON(code int, obj interface{})                 //JSON
+IndentedJSON(code int, obj interface{})
+SecureJSON(code int, obj interface{})
+JSONP(code int, obj interface{})                //jsonp
+XML(code int, obj interface{})                  //XML
+YAML(code int, obj interface{})                 //YAML
+String(code int, format string, values ...interface{})  //string
+Redirect(code int, location string)             // 重定向
+Data(code int, contentType string, data []byte) // []byte
+File(filepath string)                           // file
+SSEvent(name string, message interface{})       // Server-Sent Event
+Stream(step func(w io.Writer) bool)             // stream
+
+
+// **** 实现  context.Context 接口(GOROOT中)
+</code></pre><h2 id="使用者视角">
+  使用者视角
+  <a class="anchor" href="#%e4%bd%bf%e7%94%a8%e8%80%85%e8%a7%86%e8%a7%92">#</a>
+</h2>
+<blockquote>
+<p>编程其实是尝试的过程，通过反馈不断的修正。</p>
+</blockquote>
+<h3 id="简单的例子">
+  简单的例子
+  <a class="anchor" href="#%e7%ae%80%e5%8d%95%e7%9a%84%e4%be%8b%e5%ad%90">#</a>
+</h3>
+<pre tabindex="0"><code>// step1: 得到gin
+go get github.com/gin-gonic/gin
+
+// step2: 编辑main.go
+
+import (
+    &quot;net/http&quot;
+
+    &quot;github.com/gin-gonic/gin&quot;
+)
+
+func main() {
+    // 创建一个Engine
+    r := gin.New()
+
+    // 定义一个处理者
+    r.GET(&quot;/&quot;, func(c *gin.Context) {
+        c.String(http.StatusOK, &quot;Hello World!&quot;)
+    })
+
+    // 再定义一个处理者
+    r.POST(&quot;/ping&quot;, func(c *gin.Context) {
+        c.String(http.StatusOK, &quot;pong&quot;)
+    })
+
+    // 让其运行起来
+    r.Run(&quot;0.0.0.0:8888)
+}
+
+// step3: 运行
+go run main.go
+</code></pre><h3 id="使用路由组和中间件">
+  使用路由组和中间件
+  <a class="anchor" href="#%e4%bd%bf%e7%94%a8%e8%b7%af%e7%94%b1%e7%bb%84%e5%92%8c%e4%b8%ad%e9%97%b4%e4%bb%b6">#</a>
+</h3>
+<pre tabindex="0"><code>import (
+    &quot;net/http&quot;
+
+    &quot;github.com/gin-gonic/gin&quot;
+)
+
+func main() {
+    r := gin.New()
+
+    // 使用日志插件
+    r.Use(gin.Logger())
+
+    r.GET(&quot;/&quot;, func(c *gin.Context) {
+        c.String(http.StatusOK, &quot;Hello world&quot;)
+    })
+
+    r.POST(&quot;/ping&quot;, func(c *gin.Context) {
+        c.String(http.StatusOK, &quot;pong&quot;)
+    })
+
+    // 使用路由组
+    authGroup := r.Group(&quot;/auth&quot;, func(c *gin.Context) {
+        token := c.Query(&quot;token&quot;)
+        if token != &quot;123456&quot; {
+            c.AbortWithStatusJSON(200, map[string]string{
+                &quot;code&quot;: &quot;401&quot;,
+                &quot;msg&quot;:  &quot;auth fail&quot;,
+            })
+        }
+
+        c.Next()
+    })
+
+    // 注册 /auth/info 处理者
+    authGroup.GET(&quot;/info&quot;, func(c *gin.Context) {
+        c.JSON(200, map[string]string{
+            &quot;id&quot;:   &quot;1234&quot;,
+            &quot;name&quot;: &quot;name&quot;,
+        })
+    })
+
+    r.Run(&quot;0.0.0:8910&quot;)
+}
+</code></pre><p>很简单的注册就可以让应用跑起来了。</p>
+<h2 id="应用初始化">
+  应用初始化
+  <a class="anchor" href="#%e5%ba%94%e7%94%a8%e5%88%9d%e5%a7%8b%e5%8c%96">#</a>
+</h2>
+<p>当我们运行 <code>go run main.go</code> 时gin都做了什么呢？</p>
+<p>其实golang原生就支持http请求应用开发，任何golang web框架的本质只能是作为工具集存在的。</p>
+<p>官方文档 <a href="https://golang.org/doc/articles/wiki/">Writing Web Applications</a>介绍了如何写一个web应用。</p>
+<p>示例代码：</p>
+<pre tabindex="0"><code>// demo1
+import (
+    &quot;net/http&quot;
+)
+
+func main() {
+    http.HandleFunc(&quot;/info&quot;, func(response http.ResponseWriter, request *http.Request) {
+        response.Write([]byte(&quot;info&quot;))
+    })
+
+    http.ListenAndServe(&quot;:8888&quot;, nil)
+}
+
+
+// demo2
+import (
+    &quot;net/http&quot;
+)
+
+type Handle struct{}
+
+func (h Handle) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+    switch request.URL.Path {
+    case &quot;/info&quot;:
+        response.Write([]byte(&quot;info&quot;))
+    default:
+
+    }
+}
+
+func main() {
+    http.ListenAndServe(&quot;:8888&quot;, Handle{})
+}
+
+
+</code></pre><p>上面两个代码非常简单，但是就可以在服务器上开始一个web应用。</p>
+<p>而gin的本质也就是使用demo2的代码，进行封装，提供工具函数，方便业务开发。</p>
+<p>回到本章的主题，应用初始化大概的过程包括：</p>
+<ul>
+<li>创建一个 Engine 对象</li>
+<li>注册中间件</li>
+<li>注册路由（组）</li>
+</ul>
+<h2 id="请求生命周期">
+  请求生命周期
+  <a class="anchor" href="#%e8%af%b7%e6%b1%82%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f">#</a>
+</h2>
+<p>因为golang原生为web而生而提供了完善的功能，用户需要关注的东西大多数是业务逻辑本身了。</p>
+<p>gin能做的事情也是去把 <code>ServeHTTP(ResponseWriter, *Request)</code> 做得高效、友好。</p>
+<p>一个请求来到服务器了，<code>ServeHTTP</code> 会被调用，gin做的事情包括：</p>
+<ul>
+<li>路由，找到handle</li>
+<li>将请求和响应用Context包装起来供业务代码使用</li>
+<li>依次调用中间件和处理函数</li>
+<li>输出结果</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+  <div>
+    <a class="flex align-center" href="https://github.com/liuximu/sca/edit/master/content/docs/gin-gonic_gin/0101_flow.md" target="_blank" rel="noopener">
+      <img src="/SCA/svg/edit.svg" class="book-icon" alt="Edit" />
+      <span>Edit this page</span>
+    </a>
+  </div>
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#流程">流程</a>
+      <ul>
+        <li><a href="#context结构体">Context结构体</a></li>
+        <li><a href="#使用者视角">使用者视角</a>
+          <ul>
+            <li><a href="#简单的例子">简单的例子</a></li>
+            <li><a href="#使用路由组和中间件">使用路由组和中间件</a></li>
+          </ul>
+        </li>
+        <li><a href="#应用初始化">应用初始化</a></li>
+        <li><a href="#请求生命周期">请求生命周期</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
