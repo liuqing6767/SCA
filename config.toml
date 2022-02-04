@@ -1,0 +1,23 @@
+baseURL = '/sca'
+languageCode = 'zh-cn'
+title = 'SourceCodeAnalysis'
+theme = 'hugo-book'
+enableGitInfo = true
+
+[markup]
+[markup.tableOfContents]
+  startLevel = 1
+  endLevel = 3
+
+[params]
+BookTheme = "auto"
+BookRepo = "https://githbu.com/liuximu/sca"
+BookEditPath = 'edit/master'
+
+
+# [menu]
+# # [[menu.before]]
+# [[menu.after]]
+#   name = "Github"
+#   url = "https://github.com/liuximu/sca"
+#   weight = 10
