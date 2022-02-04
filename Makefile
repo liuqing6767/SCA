@@ -1,5 +1,5 @@
 # make, make all
-all: clean gen
+all: clean gen push
 
 clean:
 	rm -rf docs
@@ -10,3 +10,8 @@ gen: clean
 
 run:
 	hugo serve
+
+push:
+	git add .
+	git commit --amend -q
+	git push origin master

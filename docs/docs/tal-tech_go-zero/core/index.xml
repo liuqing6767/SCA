@@ -27,7 +27,7 @@ hash 函数 #  // 根据 key 得到 M 个下标 func (f *BloomFilter) getLocatio
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/SCA/docs/tal-tech_go-zero/core/02_break/</guid>
-      <description>熔断器 #  包 `core/break 提供了一个熔断器的接口和两套实现。
+      <description>熔断器 #  包 core/break 提供了一个熔断器的接口和两套实现。
 什么是 熔断器？ #  服务端经常会面临的一个问题是服务器负载过高，比如某个热点新闻导致流量短时间激增，这个时候如果不做相应的保护，服务端可能发生宕机导致直接不可用。处理这种情况一般会：
  服务降级：比如返回静态数据 服务熔断：对部分请求直接返回服务不可用，对其他请求继续提供服务  熔断器就是完成熔断功能的组件。它应该决定是否为当前请求提供正常服务，还是直接拒绝。
 go-zero熔断器的实现 #  接口定义 #  type ( // 判断一个错误返回是否依旧是成功的 	Acceptable func(err error) bool Breaker interface { // Name returns the name of the netflixBreaker. 	Name() string // 判断请求是否被允许  // 如果允许，调用方需要在调用成功后调用 promise.Accept(),失败后调用 promise.Reject  // 如果不被允许（限流了），返回的是 ErrServiceUnavailable 	Allow() (Promise, error) // DoWithFallbackAcceptable  // - 在未被限流时执行req  // - 被限流时执行fallback（回退） 	// - acceptable 检查 req 是否调用成功，即便req返回的err不是nil 	DoWithFallbackAcceptable(req func() error, fallback func(err error) error, acceptable Acceptable) error // DoWithFallbackAcceptable 的简化版  // acceptable 为 err == nil 	DoWithFallback(req func() error, fallback func(err error) error) error // DoWithFallbackAcceptable 的简化版  // fallback 逻辑为：nil 不做回退 	DoWithAcceptable(req func() error, acceptable Acceptable) error // DoWithFallbackAcceptable 的简化版  // acceptable 为 err == nil  // fallback 逻辑为：nil 不做回退 	Do(req func() error) error } ) 可以看见，类库实现的Breaker里面本质上只有两个接口：</description>
