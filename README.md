@@ -1,3 +1,0 @@
-# SCA
-
-Source Code Analysis.
