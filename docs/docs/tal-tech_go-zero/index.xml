@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>tal-tech/go-zero on SourceCodeAnalysis</title>
-    <link>/sca/docs/tal-tech_go-zero/</link>
+    <link>/SCA/docs/tal-tech_go-zero/</link>
     <description>Recent content in tal-tech/go-zero on SourceCodeAnalysis</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language><atom:link href="/sca/docs/tal-tech_go-zero/index.xml" rel="self" type="application/rss+xml" />
+    <language>zh-cn</language><atom:link href="/SCA/docs/tal-tech_go-zero/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

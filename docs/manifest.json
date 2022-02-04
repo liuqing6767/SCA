@@ -1,14 +1,14 @@
 {
   "name": "SourceCodeAnalysis",
   "short_name": "SourceCodeAnalysis",
-  "start_url": "/sca/",
-  "scope": "/sca/",
+  "start_url": "/SCA/",
+  "scope": "/SCA/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/sca/favicon.svg",
+      "src": "/SCA/favicon.svg",
       "sizes": "512x512"
     }
   ]

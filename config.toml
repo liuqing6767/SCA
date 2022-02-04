@@ -1,4 +1,4 @@
-baseURL = '/sca'
+baseURL = '/SCA'
 languageCode = 'zh-cn'
 title = 'SourceCodeAnalysis'
 theme = 'hugo-book'

@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>gin-gonic/gin on SourceCodeAnalysis</title>
-    <link>/sca/docs/gin-gonic_gin/</link>
+    <link>/SCA/docs/gin-gonic_gin/</link>
     <description>Recent content in gin-gonic/gin on SourceCodeAnalysis</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language><atom:link href="/sca/docs/gin-gonic_gin/index.xml" rel="self" type="application/rss+xml" />
+    <language>zh-cn</language><atom:link href="/SCA/docs/gin-gonic_gin/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0001_preface/</link>
+      <link>/SCA/docs/gin-gonic_gin/0001_preface/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0001_preface/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0001_preface/</guid>
       <description>源码解析之:gin #  gin 是一个用golang实现的HTTPweb框架。
 特性 #  官网上描述，gin的特性包括：
  快：路由使用基数树，低内存，不使用反射； 中间件注册：一个请求可以被一系列的中间件和最后的action处理 奔溃处理：gin可以捕获panic使应用程序可用 JSON校验：将请求的数据转换为JSON并校验 路由组：更好的组织路由的方式，无限制嵌套而不影响性能 错误管理：可以收集所有的错误 内建渲染方式：JSON，XML和HTML渲染方式 可继承：简单的去创建中间件  代码结构 #  |-- binding 将请求的数据对象化并校验 |-- examples 各种列子 |-- json 提供了另外一种json实现 |-- render 响应 |-- gin.go gin引擎所在 |-- gin_test.go |-- routes_test.go |-- context.go 上下文，将各种功能聚焦到上下文（装饰器模式） |-- context_test.go |-- response_writer.go 响应的数据输出 |-- response_writer_test.go |-- errors.go 错误处理 |-- errors_test.go |-- tree.go 路由的具体实现 |-- tree_test.go |-- routergroup.go |-- routergroup_test.go |-- auth.go 一个基本的HTTP鉴权的中间件 |-- auth_test.go |-- logger.</description>
@@ -19,10 +19,10 @@
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0101_flow/</link>
+      <link>/SCA/docs/gin-gonic_gin/0101_flow/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0101_flow/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0101_flow/</guid>
       <description>流程 #  从不同的视角去看待web应用的流程：
  使用者视角：程序员如何使用gin来编写业务逻辑 应用初始化：当进程启动时gin内部是如何初始化的 请求生命周期：当一个HTTP请求来到服务器时后如何转化为响应  说这些之前了解一下Context这个结构体
 Context结构体 #  简单介绍一下gin框架里面最重要的结构体Context，另外一个最重要的结构体是Engine，它作为单例存在；而Context是从对象池中得到。
@@ -31,20 +31,20 @@ Context结构体 #  简单介绍一下gin框架里面最重要的结构体Contex
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0200/</link>
+      <link>/SCA/docs/gin-gonic_gin/0200/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0200/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0200/</guid>
       <description>路由 #  本章讨论:
  路由调用逻辑：流程的流转逻辑 路由内部实现：基树：路由的内部实现  </description>
     </item>
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0201_router/</link>
+      <link>/SCA/docs/gin-gonic_gin/0201_router/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0201_router/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0201_router/</guid>
       <description>路由调用逻辑
 gin 对外宣传的高效，很大一部分是说其路由效率。本文内容包括：
  路由API介绍 路由调用实现逻辑 路由的内部实现  路由API #  设置路由 #  // routergroup.go:20 type IRoutes interface { Use(handlers ...HandlerFunc) IRoutes Handle(httpMethod, relativePath string, handlers ...HandlerFunc) IRoutes Any(relativePath string, handlers ...HandlerFunc) IRoutes GET(relativePath string, handlers ...HandlerFunc) IRoutes POST(relativePath string, handlers ...HandlerFunc) IRoutes DELETE(relativePath string, handlers ...HandlerFunc) IRoutes PATCH(relativePath string, handlers ...HandlerFunc) IRoutes PUT(relativePath string, handlers ...HandlerFunc) IRoutes OPTIONS(relativePath string, handlers ...HandlerFunc) IRoutes HEAD(relativePath string, handlers ...HandlerFunc) IRoutes StaticFile(relativePath, filepath string) IRoutes Static(relativePath, root string) IRoutes StaticFS(relativePath string, fs http.</description>
@@ -52,10 +52,10 @@ gin 对外宣传的高效，很大一部分是说其路由效率。本文内容�
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0202_radix_tree/</link>
+      <link>/SCA/docs/gin-gonic_gin/0202_radix_tree/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0202_radix_tree/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0202_radix_tree/</guid>
       <description>路由内部实现：基树 #  路由的内部实现 #  前面我们把route接口层面的调用都过了一遍，gin的代码调用还是很简单直接的。
  程序 = 数据结构 + 算法
  gin的核心结构体叫 Engine ，那引擎到底在哪呢？我想就是它的路由实现。接下来我们去一窥究竟。
@@ -65,10 +65,10 @@ gin 对外宣传的高效，很大一部分是说其路由效率。本文内容�
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0301_request/</link>
+      <link>/SCA/docs/gin-gonic_gin/0301_request/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0301_request/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0301_request/</guid>
       <description>请求 #  其实在流程 中就有讲到。
 在请求来到服务器后，Context对象会生成用来串流程： 和请求有关的字段包括:
 // context.go:40 type Context struct { // ServeHTTP的第二个参数: request Request *http.Request // URL里面的参数，比如：/xx/:id Params Params } 获取restful接口的参数 #  在路由解析时会初始化 Params 提供Get函数：
@@ -77,10 +77,10 @@ Param(key string) string 获取请求数据： #  // Header GetHeader(key string
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0401_response/</link>
+      <link>/SCA/docs/gin-gonic_gin/0401_response/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0401_response/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0401_response/</guid>
       <description>响应 #  其实在流程 中就有讲到。
 在请求来到服务器后，Context对象会生成用来串流程： 和请求有关的字段包括:
 // context.go:40 type Context struct { // 用来响应 Writer ResponseWriter writermem responseWriter } // response_writer.go:20 type ResponseWriter interface { http.ResponseWriter //嵌入接口 http.Hijacker //嵌入接口 http.Flusher //嵌入接口 http.CloseNotifier //嵌入接口 // 返回当前请求的 response status code Status() int // 返回写入 http body的字节数 Size() int // 写string WriteString(string) (int, error) //是否写出 Written() bool // 强制写htp header (状态码 + headers) WriteHeaderNow() } // response_writer.go:40 // 实现 ResponseWriter 接口 type responseWriter struct { http.</description>
@@ -88,10 +88,10 @@ Param(key string) string 获取请求数据： #  // Header GetHeader(key string
     
     <item>
       <title></title>
-      <link>/sca/docs/gin-gonic_gin/0501_other/</link>
+      <link>/SCA/docs/gin-gonic_gin/0501_other/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/sca/docs/gin-gonic_gin/0501_other/</guid>
+      <guid>/SCA/docs/gin-gonic_gin/0501_other/</guid>
       <description>其他主题 #  基本上介绍完 gin 框架了，一个非常克制的框架，提供了路由、使用 Context 来封装数据。 golang的原生库对web开发是较为完善的，所有的框架只能是工具集。
 中间件 #  中间件实际上上特殊的 HandleFuc 注册在 Engine.RouterGroup 上，最终会附加到每个节点的handlerList前，每次处理时依次调用。
 gin 提供了几个中间件:

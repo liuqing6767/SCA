@@ -16,16 +16,16 @@ gin 提供了几个中间件:
  auth: auth.go，完成基本的鉴权 log: logger.go，完成请求日志输出 recover: recover.go， 完成崩溃处理  错误管理 #  错误管理是指在业务处理中可以将错误不断的设置到context中，然后可以一次性处理，比如记日志。
 // context.go:40 type Context struct { // 一系列的错误 Errors errorMsgs } Error(err error) *Error // 给本次请求添加个错误。将错误收集然后用中间件统一处理（打日志|入库）是一个比较好的方案 元数据管理 #  // context.go:40 type Context struct { // 在context可以设置的值 Keys map[string]interface{} } Set(key string, value interface{}) //本次请求用户设置各种数据 (Keys 字段) Get(key string)(value interface{}, existed bool) MustGet(key string)(value interface{}) GetString(key string) string GetBool(key string) bool GetInt(key string) int GetInt64(key string) int64 GetFloat64(key string) float64 GetTime(key string) time." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/sca/docs/gin-gonic_gin/0501_other/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="/SCA/docs/gin-gonic_gin/0501_other/" /><meta property="article:section" content="docs" />
 
 <meta property="article:modified_time" content="2022-02-04T11:38:06+08:00" />
 
 <title>0501 Other | SourceCodeAnalysis</title>
-<link rel="manifest" href="/sca/manifest.json">
-<link rel="icon" href="/sca/favicon.png" type="image/x-icon">
-<link rel="stylesheet" href="/sca/book.min.97cfda4f5e3c9fa49a2bf8d401f4ddc0eec576c99cdcf6afbec19173200c37db.css" >
-  <script defer src="/sca/flexsearch.min.js"></script>
-  <script defer src="/sca/en.search.min.cf0f68eea2276c8c3f344cf8f93378b515b95f8bb3f6bff4f37cf6d5b0dcbe39.js" ></script>
+<link rel="manifest" href="/SCA/manifest.json">
+<link rel="icon" href="/SCA/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/SCA/book.min.97cfda4f5e3c9fa49a2bf8d401f4ddc0eec576c99cdcf6afbec19173200c37db.css" >
+  <script defer src="/SCA/flexsearch.min.js"></script>
+  <script defer src="/SCA/en.search.min.57f9b31c7ca1ae1f1ead74b1a88c6bf44bb5707361ffe5cf148fd14fbd82a525.js" ></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -41,7 +41,7 @@ https://github.com/alex-shpak/hugo-book
         
   <nav>
 <h2 class="book-brand">
-  <a class="flex align-center" href="/sca/"><span>SourceCodeAnalysis</span>
+  <a class="flex align-center" href="/SCA/"><span>SourceCodeAnalysis</span>
   </a>
 </h2>
 
@@ -93,7 +93,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0001_preface/" class="">0001 Preface</a>
+    <a href="/SCA/docs/gin-gonic_gin/0001_preface/" class="">0001 Preface</a>
   
 
         </li>
@@ -106,7 +106,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0101_flow/" class="">0101 Flow</a>
+    <a href="/SCA/docs/gin-gonic_gin/0101_flow/" class="">0101 Flow</a>
   
 
         </li>
@@ -119,7 +119,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0200/" class="">200th</a>
+    <a href="/SCA/docs/gin-gonic_gin/0200/" class="">200th</a>
   
 
         </li>
@@ -132,7 +132,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0201_router/" class="">0201 Router</a>
+    <a href="/SCA/docs/gin-gonic_gin/0201_router/" class="">0201 Router</a>
   
 
         </li>
@@ -145,7 +145,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0202_radix_tree/" class="">0202 Radix Tree</a>
+    <a href="/SCA/docs/gin-gonic_gin/0202_radix_tree/" class="">0202 Radix Tree</a>
   
 
         </li>
@@ -158,7 +158,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0301_request/" class="">0301 Request</a>
+    <a href="/SCA/docs/gin-gonic_gin/0301_request/" class="">0301 Request</a>
   
 
         </li>
@@ -171,7 +171,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0401_response/" class="">0401 Response</a>
+    <a href="/SCA/docs/gin-gonic_gin/0401_response/" class="">0401 Response</a>
   
 
         </li>
@@ -184,7 +184,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/gin-gonic_gin/0501_other/" class=" active">0501 Other</a>
+    <a href="/SCA/docs/gin-gonic_gin/0501_other/" class=" active">0501 Other</a>
   
 
         </li>
@@ -234,7 +234,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/01_bloom_filter/" class="">01 Bloom Filter</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/01_bloom_filter/" class="">01 Bloom Filter</a>
   
 
         </li>
@@ -247,7 +247,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/02_break/" class="">02 Break</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/02_break/" class="">02 Break</a>
   
 
         </li>
@@ -260,7 +260,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/03_collection/" class="">03 Collection</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/03_collection/" class="">03 Collection</a>
   
 
         </li>
@@ -273,7 +273,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/04_executor/" class="">04 Executor</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/04_executor/" class="">04 Executor</a>
   
 
         </li>
@@ -286,7 +286,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/05_fx/" class="">05 Fx</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/05_fx/" class="">05 Fx</a>
   
 
         </li>
@@ -299,7 +299,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/06_hash/" class="">06 Hash</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/06_hash/" class="">06 Hash</a>
   
 
         </li>
@@ -312,7 +312,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/sca/docs/tal-tech_go-zero/core/09_other/" class="">09 Other</a>
+    <a href="/SCA/docs/tal-tech_go-zero/core/09_other/" class="">09 Other</a>
   
 
         </li>
@@ -361,14 +361,14 @@ https://github.com/alex-shpak/hugo-book
         
   <div class="flex align-center justify-between">
   <label for="menu-control">
-    <img src="/sca/svg/menu.svg" class="book-icon" alt="Menu" />
+    <img src="/SCA/svg/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
   <strong>0501 Other</strong>
 
   <label for="toc-control">
     
-    <img src="/sca/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    <img src="/SCA/svg/toc.svg" class="book-icon" alt="Table of Contents" />
     
   </label>
 </div>
@@ -541,8 +541,8 @@ func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *R
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://githbu.com/liuximu/sca/commit/d3b3b9febe9ff0094cb959e438a59377843959f1" title='Last modified by liuximu | February 4, 2022' target="_blank" rel="noopener">
-      <img src="/sca/svg/calendar.svg" class="book-icon" alt="Calendar" />
+  <div><a class="flex align-center" href="https://githbu.com/liuximu/sca/commit/879fc794306f3f6e1e7326fc6a9d668f203e32c5" title='Last modified by liuximu | February 4, 2022' target="_blank" rel="noopener">
+      <img src="/SCA/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>February 4, 2022</span>
     </a>
   </div>
@@ -551,7 +551,7 @@ func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *R
 
   <div>
     <a class="flex align-center" href="https://githbu.com/liuximu/sca/edit/master/content/docs/gin-gonic_gin/0501_other.md" target="_blank" rel="noopener">
-      <img src="/sca/svg/edit.svg" class="book-icon" alt="Edit" />
+      <img src="/SCA/svg/edit.svg" class="book-icon" alt="Edit" />
       <span>Edit this page</span>
     </a>
   </div>
