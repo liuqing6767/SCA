@@ -13,5 +13,5 @@ run:
 
 push:
 	git add .
-	git commit --amend -q
+	git commit --amend --no-edit
 	git push origin master
