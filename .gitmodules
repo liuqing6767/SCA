@@ -1,9 +1,3 @@
 [submodule "themes/hugo-book"]
-	path = themes/hugo-book
+	path = _gen/themes/hugo-book
 	url = git@github.com:alex-shpak/hugo-book
-[submodule "themes/hugo-dpsg"]
-	path = themes/hugo-dpsg
-	url = git@github.com:pfadfinder-konstanz/hugo-dpsg.git
-[submodule "themes/doks"]
-	path = themes/doks
-	url = git@github.com:h-enk/doks.git
