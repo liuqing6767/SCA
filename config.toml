@@ -11,7 +11,7 @@ enableGitInfo = true
 
 [params]
 BookTheme = "auto"
-BookRepo = "https://githbu.com/liuximu/sca"
+BookRepo = "https://github.com/liuximu/sca"
 BookEditPath = 'edit/master'
 
 
