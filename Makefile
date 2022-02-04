@@ -1,17 +1,21 @@
 # make, make all
-all: clean gen push
+all: prepare gen push
 
-clean:
-	rm -rf docs
+prepare:
+	git submodule init
+	git submodule update
 
-gen: clean
-	hugo -D
-	mv public docs
+gen: prepare
+	cd _gen && hugo -d /tmp/hugo_docs
+
+push:
+	git checkout pages
+	rm -rf ./*
+	mv /tmp/hugo_docs/* ./
+	git add .
+	git commit -m 'auto submit'
+	git push origin pages
+	git checkout master
 
 run:
 	hugo serve
-
-push:
-	git add .
-	git commit --amend --no-edit
-	git push origin master
